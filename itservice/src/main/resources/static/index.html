@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IT Equipment Borrow System</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        input, select, button { margin: 5px; padding: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    </style>
+    </head>
+    <body>
+
+    <h1>🎒 IT Equipment Borrow System</h1>
+
+    <h3>📦 Filter Equipment by Type</h3>
+    <input type="text" id="typeFilter" placeholder="e.g. Laptop">
+    <button onclick="loadEquipment()">Search</button>
+
+    <h3>📋 Available Equipment</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Brand</th>
+            <th>Model</th>
+            <th>Available</th>
+        </tr>
+        </thead>
+        <tbody id="equipmentList"></tbody>
+    </table>
+
+    <h3>➕ Borrow Equipment</h3>
+    <input type="number" id="borrowEmployeeId" placeholder="Employee ID">
+    <input type="number" id="borrowEquipmentId" placeholder="Equipment ID">
+    <button onclick="borrowEquipment()">Borrow</button>
+
+    <h3>🔁 Return Equipment</h3>
+    <input type="number" id="returnBorrowId" placeholder="Borrow Record ID">
+    <button onclick="returnEquipment()">Return</button>
+
+    <script>
+        const BASE_URL = "http://localhost:8080";
+
+        async function loadEquipment() {
+        const type = document.getElementById("typeFilter").value;
+        let url = type ? `${BASE_URL}/equipment/type?type=${type}` : `${BASE_URL}/equipment`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const table = document.getElementById("equipmentList");
+        table.innerHTML = data.map(eq => `
+            <tr>
+            <td>${eq.id}</td>
+            <td>${eq.name}</td>
+            <td>${eq.type}</td>
+            <td>${eq.brand}</td>
+            <td>${eq.model}</td>
+            <td>${eq.available ? "✅" : "❌"}</td>
+            </tr>
+        `).join("");
+        }
+
+        async function borrowEquipment() {
+        const employeeId = document.getElementById("borrowEmployeeId").value;
+        const equipmentId = document.getElementById("borrowEquipmentId").value;
+        const res = await fetch(`${BASE_URL}/borrow?employeeId=${employeeId}&equipmentId=${equipmentId}`, {
+            method: "POST"
+        });
+        const result = await res.json();
+        alert("Borrowed! Borrow ID = " + result.id);
+        loadEquipment();
+        }
+
+        async function returnEquipment() {
+        const borrowId = document.getElementById("returnBorrowId").value;
+        const res = await fetch(`${BASE_URL}/borrow/return?borrowId=${borrowId}`, {
+            method: "POST"
+        });
+        const result = await res.json();
+        alert("Returned equipment ID: " + result.equipment.id);
+        loadEquipment();
+        }
+
+        loadEquipment(); // Load data on page load
+    </script>
+
+</body>
+</html>
