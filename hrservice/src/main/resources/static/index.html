@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Search</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            margin-top: 50px;
+        }
+        .container {
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 class="text-center">Search Employees</h2>
+
+    <!-- Form to search employees -->
+    <form id="employeeSearchForm">
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" class="form-control" id="title" name="title" placeholder="Enter Title (Optional)">
+        </div>
+        <div class="form-group">
+            <label for="position">Position</label>
+            <input type="text" class="form-control" id="position" name="position" placeholder="Enter Position (Optional)">
+        </div>
+        <div class="form-group">
+            <label for="salary">Salary</label>
+            <input type="number" class="form-control" id="salary" name="salary" placeholder="Enter Salary (Optional)">
+        </div>
+        <div class="form-group">
+            <label for="salaryFilter">Salary Filter</label>
+            <select class="form-control" id="salaryFilter" name="salaryFilter">
+                <option value="equal">Equal</option>
+                <option value="greater">Greater than</option>
+                <option value="less">Less than</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <h3 class="mt-5">Employee Results:</h3>
+    <table class="table table-bordered mt-3" id="employeeTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Position</th>
+                <th>Salary</th>
+                <th>Phone</th>
+                <th>Edit</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Employee data will be inserted here -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Bootstrap JS and jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Handle form submission
+        $('#employeeSearchForm').on('submit', function(e) {
+            e.preventDefault();
+
+            // Get values from the form
+            const title = $('#title').val();
+            const position = $('#position').val();
+            const salary = $('#salary').val();
+            const salaryFilter = $('#salaryFilter').val();
+
+            // Build query string
+            let queryString = '';
+            if (title) queryString += `title=${title}&`;
+            if (position) queryString += `position=${position}&`;
+            if (salary) queryString += `salary=${salary}&salaryFilter=${salaryFilter}&`;
+
+            // Send request to the backend API
+            $.ajax({
+                url: `http://localhost:8080/employees?${queryString}`,
+                type: 'GET',
+                success: function(data) {
+                    $('#employeeTable tbody').empty();
+                
+                    data.forEach(employee => {
+                        $('#employeeTable tbody').append(`
+                            <tr data-id="${employee.id}">
+                                <td>${employee.id}</td>
+                                <td class="editable" data-field="title">${employee.title}</td>
+                                <td class="editable" data-field="firstname">${employee.firstname}</td>
+                                <td class="editable" data-field="lastname">${employee.lastname}</td>
+                                <td class="editable" data-field="position">${employee.position}</td>
+                                <td class="editable" data-field="salary">${employee.salary}</td>
+                                <td class="editable" data-field="phone">${employee.phone}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning edit-btn">Edit</button>
+                                </td>
+                            </tr>
+                        `);
+                    });
+                
+                    // Attach event handler for Edit button
+                    $('.edit-btn').on('click', function() {
+                        const $row = $(this).closest('tr');
+                        const isEditing = $(this).text() === 'Save';
+                
+                        if (!isEditing) {
+                            // Convert text to input
+                            $row.find('.editable').each(function() {
+                                const text = $(this).text();
+                                $(this).html(`<input type="text" class="form-control form-control-sm" value="${text}">`);
+                            });
+                            $(this).text('Save').removeClass('btn-warning').addClass('btn-success');
+                        } else {
+                            // Collect updated data
+                            const id = $row.data('id');
+                            const updatedData = {};
+                
+                            $row.find('.editable').each(function() {
+                                const field = $(this).data('field');
+                                const value = $(this).find('input').val();
+                                updatedData[field] = value;
+                                $(this).text(value); // Switch back to plain text
+                            });
+                            
+                            console.log(updatedData)
+                        
+                            // Send updated data to backend
+                            $.ajax({
+                                url: `http://localhost:8080/employees/update/${id}`,
+                                type: 'PUT', // หรือ PATCH ตาม API ของคุณ
+                                contentType: 'application/json',
+                                data: JSON.stringify(updatedData),
+                                success: function() {
+                                    alert('Employee updated successfully.');
+                                },
+                                error: function() {
+                                    alert('Error updating employee.');
+                                }
+                            });
+                
+                            $(this).text('Edit').removeClass('btn-success').addClass('btn-warning');
+                        }
+                    });
+                },                
+                
+                error: function() {
+                    alert('An error occurred while fetching employee data.');
+                }
+            });
+        });
+    });
+
+    
+</script>
+
+</body>
+</html>
