@@ -26,10 +26,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Query("SELECT e FROM Employee e WHERE " +
         "(:title IS NULL OR LOWER(e.title) LIKE LOWER(CONCAT('%', :title, '%'))) AND " +
         "(:position IS NULL OR LOWER(e.position) LIKE LOWER(CONCAT('%', :position, '%'))) AND " +
-        "(:salary IS NULL OR e.salary = :salary) AND " +
-        "(:salaryFilter IS NULL OR " +
-        "(:salaryFilter = 'greater' AND e.salary > :salary) OR " +
-        "(:salaryFilter = 'less' AND e.salary < :salary) OR " +
-        "(:salaryFilter = 'equal' AND e.salary = :salary))")
-    List<Employee> search(String title, String position, BigDecimal salary, String salaryFilter);
+        "(:minSalary IS NULL OR e.salary >= :minSalary) AND " +
+        "(:maxSalary IS NULL OR e.salary <= :maxSalary)")
+    List<Employee> search(String title, String position, float minSalary,float maxSalary);
 }

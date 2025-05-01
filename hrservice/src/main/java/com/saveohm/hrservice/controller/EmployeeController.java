@@ -28,11 +28,11 @@ public class EmployeeController {
     public List<Employee> getEmployees(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String position,
-            @RequestParam(required = false) BigDecimal salary,
-            @RequestParam(required = false) String salaryFilter  // "greater", "less", "equal"
+            @RequestParam(defaultValue = "0") Float minSalary,
+            @RequestParam(defaultValue = "99999999999") Float maxSalary
     ) {
         // ค้นหาตามทุกเงื่อนไขที่ระบุใน query string
-        return employeeRepository.search(title, position, salary, salaryFilter);
+        return employeeRepository.search(title, position, minSalary, maxSalary);
     }
 
     @PutMapping("/update/{id}")
