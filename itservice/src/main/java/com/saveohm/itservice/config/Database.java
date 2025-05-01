@@ -22,7 +22,7 @@ public class Database {
                 repository.saveAll(List.of(
                         new ITEquipment(null, "Laptop", "Computer", "Dell", "XPS 13", "SN12345", true),
                         new ITEquipment(null, "Monitor", "Display", "LG", "UltraWide", "SN67890", true),
-                        new ITEquipment(null, "Mouse", "Accessory", "Logitech", "MX Master 3", "SN54321", false)
+                        new ITEquipment(null, "Mouse", "Accessory", "Logitech", "MX Master 3", "SN54321", true)
                         ));
 
                 log.info("Seed Database Success");

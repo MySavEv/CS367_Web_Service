@@ -1,6 +1,8 @@
 package com.saveohm.itservice.controller;
 
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.saveohm.itservice.model.BorrowRecord;
@@ -10,6 +12,7 @@ import com.saveohm.itservice.repository.ITEquipmentRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/borrow") 
@@ -25,9 +28,16 @@ public class BorrowController {
 
     // ✅ ยืมอุปกรณ์
     @PostMapping
-    public BorrowRecord borrow(@RequestParam Long employeeId, @RequestParam Long equipmentId) {
+    public ResponseEntity<?> borrow(@RequestParam Long employeeId, @RequestParam Long equipmentId) {
         ITEquipment equipment = equipmentRepo.findById(equipmentId).orElseThrow();
-        if (!equipment.isAvailable()) throw new RuntimeException("Equipment not available");
+        if (equipment == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Equipment not found");
+            }
+        
+            if (!equipment.isAvailable()) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                    .body("Equipment not available");
+            }
 
         equipment.setAvailable(false);
         equipmentRepo.save(equipment);
@@ -39,14 +49,22 @@ public class BorrowController {
                 .returned(false)
                 .build();
 
-        return borrowRecordRepo.save(record);
+        return ResponseEntity.ok(borrowRecordRepo.save(record));
     }
 
     // ✅ คืนอุปกรณ์
     @PostMapping("/return")
-    public BorrowRecord returnEquipment(@RequestParam Long borrowId) {
-        BorrowRecord record = borrowRecordRepo.findById(borrowId).orElseThrow();
-        if (record.isReturned()) throw new RuntimeException("Already returned");
+    public ResponseEntity<?> returnEquipment(@RequestParam Long borrowId) {
+        Optional<BorrowRecord> oprecord = borrowRecordRepo.findById(borrowId);
+        if (!oprecord.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Borrow record not found");
+        }
+        BorrowRecord record = oprecord.get();
+
+        if (record.isReturned()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Already returned");
+        }
 
         record.setReturnDate(LocalDate.now());
         record.setReturned(true);
@@ -56,7 +74,13 @@ public class BorrowController {
         equipment.setAvailable(true);
         equipmentRepo.save(equipment);
 
-        return record;
+        return ResponseEntity.ok(record);
+    }
+
+    // ✅ ดูรายการยืมของพนักงาน
+    @GetMapping("/all")
+    public List<BorrowRecord> getAllBorrows() {
+        return borrowRecordRepo.findAll();
     }
 
     // ✅ ดูรายการยืมของพนักงาน
