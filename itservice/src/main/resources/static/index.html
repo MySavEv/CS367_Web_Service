@@ -1,91 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>IT Equipment Borrow System</title>
-    <style>
-        body { font-family: sans-serif; margin: 20px; }
-        input, select, button { margin: 5px; padding: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    </style>
-    </head>
-    <body>
+  <meta charset="UTF-8">
+  <title>IT Equipment Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+    h2 {
+      margin-top: 40px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    input, select, button {
+      padding: 6px;
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
 
-    <h1>🎒 IT Equipment Borrow System</h1>
+  <h1>IT Equipment Service</h1>
 
-    <h3>📦 Filter Equipment by Type</h3>
-    <input type="text" id="typeFilter" placeholder="e.g. Laptop">
-    <button onclick="loadEquipment()">Search</button>
+  <h2>🎯 All Equipment</h2>
+  <button onclick="loadAllEquipment()">Load All</button>
+  <button onclick="loadAvailable()">Show Available Only</button>
+  <table id="equipmentTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Available</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-    <h3>📋 Available Equipment</h3>
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Brand</th>
-            <th>Model</th>
-            <th>Available</th>
-        </tr>
-        </thead>
-        <tbody id="equipmentList"></tbody>
-    </table>
+  <!-- <h2>➕ Add New Equipment</h2>
+  <input type="text" id="nameInput" placeholder="Name">
+  <input type="text" id="typeInput" placeholder="Type">
+  <button onclick="addEquipment()">Add</button> -->
 
-    <h3>➕ Borrow Equipment</h3>
-    <input type="number" id="borrowEmployeeId" placeholder="Employee ID">
-    <input type="number" id="borrowEquipmentId" placeholder="Equipment ID">
-    <button onclick="borrowEquipment()">Borrow</button>
+  <h2>📦 Borrow Equipment</h2>
+  <input type="number" id="borrowEmployeeId" placeholder="Employee ID">
+  <input type="number" id="borrowEquipmentId" placeholder="Equipment ID">
+  <button onclick="borrowEquipment()">Borrow</button>
 
-    <h3>🔁 Return Equipment</h3>
-    <input type="number" id="returnBorrowId" placeholder="Borrow Record ID">
-    <button onclick="returnEquipment()">Return</button>
+  <!-- <h2>📤 Return Equipment</h2>
+  <input type="number" id="returnBorrowId" placeholder="Borrow ID">
+  <button onclick="returnEquipment()">Return</button> -->
 
-    <script>
-        const BASE_URL = "http://localhost:8081";
+  <h2>🧾 View Borrow Records</h2>
+  <input type="number" id="searchEmployeeId" placeholder="Employee ID">
+  <button onclick="getBorrowRecords()">Search</button>
+  <button onclick="getAllBorrowRecords()">Search All</button>
+  <table id="borrowTable">
+    <thead>
+      <tr>
+        <th>Borrow ID</th>
+        <th>Equipment Name</th>
+        <th>Borrow Date</th>
+        <th>Return Date</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-        async function loadEquipment() {
-        const type = document.getElementById("typeFilter").value;
-        let url = type ? `${BASE_URL}/equipment/type?type=${type}` : `${BASE_URL}/equipment`;
-        const res = await fetch(url);
-        const data = await res.json();
-        const table = document.getElementById("equipmentList");
-        table.innerHTML = data.map(eq => `
-            <tr>
-            <td>${eq.id}</td>
-            <td>${eq.name}</td>
-            <td>${eq.type}</td>
-            <td>${eq.brand}</td>
-            <td>${eq.model}</td>
-            <td>${eq.available ? "✅" : "❌"}</td>
-            </tr>
-        `).join("");
+  <script>
+    const API = "http://localhost:8081";
+
+    async function loadAllEquipment() {
+      const res = await fetch(`${API}/equipment`);
+      const data = await res.json();
+      displayEquipment(data);
+    }
+
+    async function loadAvailable() {
+      const res = await fetch(`${API}/equipment/available`);
+      const data = await res.json();
+      displayEquipment(data);
+    }
+
+    function displayEquipment(data) {
+        const tbody = document.querySelector("#equipmentTable tbody");
+        tbody.innerHTML = "";
+        data.forEach(e => {
+            tbody.innerHTML += `<tr>
+            <td>${e.id}</td>
+            <td>${e.name}</td>
+            <td>${e.type}</td>
+            <td>${e.available ? "✅" : "❌"}</td>
+            </tr>`;
+        });
         }
 
-        async function borrowEquipment() {
+    async function addEquipment() {
+        const name = document.getElementById("nameInput").value;
+        const type = document.getElementById("typeInput").value;
+        const res = await fetch(`${API}/equipment`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, type, available: true })
+        });
+        const data = await res.json();
+        alert("Added equipment: " + data.name);
+        loadAllEquipment();
+        }
+
+    async function borrowEquipment() {
         const employeeId = document.getElementById("borrowEmployeeId").value;
         const equipmentId = document.getElementById("borrowEquipmentId").value;
-        const res = await fetch(`${BASE_URL}/borrow?employeeId=${employeeId}&equipmentId=${equipmentId}`, {
+        const res = await fetch(`${API}/borrow?employeeId=${employeeId}&equipmentId=${equipmentId}`, {
             method: "POST"
         });
-        const result = await res.json();
-        alert("Borrowed! Borrow ID = " + result.id);
-        loadEquipment();
+        if (res.ok) {
+            const data = await res.json();
+            alert("Borrowed successfully, borrow ID: " + data.id);
+            loadAllEquipment();
+        } else {
+            alert("Failed to borrow. " + await res.text());
+        }
         }
 
-        async function returnEquipment() {
-        const borrowId = document.getElementById("returnBorrowId").value;
-        const res = await fetch(`${BASE_URL}/borrow/return?borrowId=${borrowId}`, {
+    async function returnEquipment(borrowId) {
+        <!-- const borrowId = document.getElementById("returnBorrowId").value; -->
+        const res = await fetch(`${API}/borrow/return?borrowId=${borrowId}`, {
             method: "POST"
         });
-        const result = await res.json();
-        alert("Returned equipment ID: " + result.equipment.id);
-        loadEquipment();
+        if (res.ok) {
+            const data = await res.json();
+            alert("Returned successfully.");
+            loadAllEquipment();
+            getAllBorrowRecords();
+        } else {
+            alert("Return failed. " + await res.text());
         }
 
-        loadEquipment(); // Load data on page load
+    }
+
+    /*async function getBorrowRecords() {
+        const employeeId = document.getElementById("searchEmployeeId").value;
+        const res = await fetch(`${API}/borrow/employee/${employeeId}`);
+        const data = await res.json();
+        const tbody = document.querySelector("#borrowTable tbody");
+        tbody.innerHTML = "";
+        data.forEach(r => {
+            tbody.innerHTML += `<tr>
+            <td>${r.id}</td>
+            <td>${r.equipment.name}</td>
+            <td>${r.borrowDate}</td>
+            <td>${r.returnDate || "-"}</td>
+            <td>${r.returned ? "✅ Returned" : "❌ Not Returned"}</td>
+            </tr>`;
+        });
+        }*/
+
+    async function getBorrowRecords() {
+            const employeeId = document.getElementById("searchEmployeeId").value;
+            const res = await fetch(`${API}/borrow/employee/${employeeId}`);
+            const data = await res.json();
+            const tbody = document.querySelector("#borrowTable tbody");
+            tbody.innerHTML = "";
+        
+            data.forEach(r => {
+            const returnButton = !r.returned
+                ? `<button onclick="returnEquipment(${r.id})">Return</button>`
+                : "";
+        
+            tbody.innerHTML += `<tr>
+                <td>${r.id}</td>
+                <td>${r.equipment.name}</td>
+                <td>${r.borrowDate}</td>
+                <td>${r.returnDate || "-"}</td>
+                <td>${r.returned ? "✅ Returned" : "❌ Not Returned"} ${returnButton}</td>
+            </tr>`;
+            });
+        }
+
+        async function getAllBorrowRecords() {
+            const employeeId = document.getElementById("searchEmployeeId").value;
+            const res = await fetch(`${API}/borrow/all`);
+            const data = await res.json();
+            const tbody = document.querySelector("#borrowTable tbody");
+            tbody.innerHTML = "";
+        
+            data.forEach(r => {
+            const returnButton = !r.returned
+                ? `<button onclick="returnEquipment(${r.id})">Return</button>`
+                : "";
+        
+            tbody.innerHTML += `<tr>
+                <td>${r.id}</td>
+                <td>${r.equipment.name}</td>
+                <td>${r.borrowDate}</td>
+                <td>${r.returnDate || "-"}</td>
+                <td>${r.returned ? "✅ Returned" : "❌ Not Returned"} ${returnButton}</td>
+            </tr>`;
+            });
+        }
+
+
     </script>
-
 </body>
 </html>

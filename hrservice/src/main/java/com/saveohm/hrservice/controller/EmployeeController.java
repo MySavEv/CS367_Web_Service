@@ -36,7 +36,7 @@ public class EmployeeController {
     }
 
     @PutMapping("/update/{id}")
-    public Employee updatePhone(
+    public Employee updateEmployee(
             @RequestBody Employee entity,
             @PathVariable long id
     ) {
