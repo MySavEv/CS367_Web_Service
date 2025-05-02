@@ -147,7 +147,7 @@
     }
 
     async function returnEquipment(borrowId) {
-      <!-- const borrowId = document.getElementById("returnBorrowId").value; -->
+      // const borrowId = document.getElementById("returnBorrowId").value;
       const res = await fetch(`${API}/borrow/return?borrowId=${borrowId}`, {
         method: "POST"
       });
