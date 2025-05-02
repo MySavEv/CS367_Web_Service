@@ -27,7 +27,14 @@ public class BorrowController {
 
     // ✅ ยืมอุปกรณ์
     @PostMapping
-    public ResponseEntity<?> borrow(@RequestParam Long employeeId, @RequestParam Long equipmentId) {
+    public ResponseEntity<?> borrow(
+        @RequestParam(required = false) Long employeeId, 
+        @RequestParam(required = false) Long equipmentId) {
+
+        if (employeeId == null || equipmentId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Require employeeId & equipmentId");
+        }
+
         Optional<ITEquipment> oequipment = equipmentRepo.findById(equipmentId);
         if (!oequipment.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Equipment not found");
@@ -35,7 +42,7 @@ public class BorrowController {
         ITEquipment equipment = oequipment.get();
 
         if (!equipment.isAvailable()) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Equipment not available");
         }
 
