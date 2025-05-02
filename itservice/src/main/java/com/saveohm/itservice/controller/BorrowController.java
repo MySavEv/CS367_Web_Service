@@ -1,6 +1,5 @@
 package com.saveohm.itservice.controller;
 
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/borrow") 
+@RequestMapping("/borrow")
 public class BorrowController {
 
     private final BorrowRecordRepository borrowRecordRepo;
@@ -29,15 +28,16 @@ public class BorrowController {
     // ✅ ยืมอุปกรณ์
     @PostMapping
     public ResponseEntity<?> borrow(@RequestParam Long employeeId, @RequestParam Long equipmentId) {
-        ITEquipment equipment = equipmentRepo.findById(equipmentId).orElseThrow();
-        if (equipment == null) {
+        Optional<ITEquipment> oequipment = equipmentRepo.findById(equipmentId);
+        if (!oequipment.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Equipment not found");
-            }
-        
-            if (!equipment.isAvailable()) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                    .body("Equipment not available");
-            }
+        }
+        ITEquipment equipment = oequipment.get();
+
+        if (!equipment.isAvailable()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Equipment not available");
+        }
 
         equipment.setAvailable(false);
         equipmentRepo.save(equipment);
@@ -63,7 +63,7 @@ public class BorrowController {
 
         if (record.isReturned()) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body("Already returned");
+                    .body("Already returned");
         }
 
         record.setReturnDate(LocalDate.now());
