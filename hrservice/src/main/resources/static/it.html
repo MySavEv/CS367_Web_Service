@@ -5,90 +5,166 @@
   <meta charset="UTF-8">
   <title>IT Equipment Management</title>
   <style>
+    :root {
+      --primary: #4fc3f7;
+
+      --primary-dark: #0288d1;
+
+      --bg: #1e1e2f;
+
+      --card-bg: #2a2a3d;
+
+      --border: #3c3f58;
+      --text: #e0e0e0;
+
+    }
+
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
       margin: 40px;
+      color: var(--text);
+    }
+
+    h1 {
+      color: var(--primary);
+      margin-bottom: 20px;
+      font-size: 32px;
     }
 
     h2 {
       margin-top: 40px;
+      color: var(--primary);
+      font-size: 22px;
+    }
+
+    .section {
+      background-color: var(--card-bg);
+      padding: 24px;
+      border-radius: 15px;
+      box-shadow: 6px 6px 12px #1a1a2a, -6px -6px 12px #34344a;
+      margin-bottom: 40px;
+      transition: all 0.3s ease;
     }
 
     table {
-      border-collapse: collapse;
       width: 100%;
-      margin-top: 10px;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background-color: #262638;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      color: var(--text);
     }
 
     th,
     td {
-      border: 1px solid #ddd;
-      padding: 8px;
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
     }
 
     th {
-      background-color: #f2f2f2;
+      background-color: #33334d;
+      color: #b0cfff;
+    }
+
+    tr:hover {
+      background-color: #2f2f4f;
     }
 
     input,
     select,
     button {
-      padding: 6px;
-      margin: 5px;
+      padding: 10px 14px;
+      margin: 10px 6px 16px 0;
+      border: 1px solid #555;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      background-color: #2a2a3d;
+      color: var(--text);
+      transition: all 0.2s ease;
+    }
+
+    input[type="number"] {
+      width: 180px;
+    }
+
+    button {
+      background-color: var(--primary);
+      color: #fff;
+      cursor: pointer;
+      border: none;
+      font-weight: bold;
+      box-shadow: 2px 2px 5px rgba(79, 195, 247, 0.2);
+    }
+
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+
+    button:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+    }
+
+    table button {
+      padding: 6px 10px;
+      font-size: 13px;
+      border-radius: 6px;
     }
   </style>
 </head>
 
 <body>
 
-  <h1>IT Equipment Service</h1>
+  <h1>💻 IT Equipment Service</h1>
 
-  <h2>🎯 All Equipment</h2>
-  <button onclick="loadAllEquipment()">Load All</button>
-  <button onclick="loadAvailable()">Show Available Only</button>
-  <table id="equipmentTable">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Available</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="section">
+    <h2>🎯 All Equipment</h2>
+    <button onclick="loadAllEquipment()">Load All</button>
+    <button onclick="loadAvailable()">Show Available Only</button>
+    <table id="equipmentTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Available</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-  <!-- <h2>➕ Add New Equipment</h2>
-  <input type="text" id="nameInput" placeholder="Name">
-  <input type="text" id="typeInput" placeholder="Type">
-  <button onclick="addEquipment()">Add</button> -->
+  <div class="section">
+    <h2>📦 Borrow Equipment</h2>
+    <input type="number" id="borrowEmployeeId" placeholder="Employee ID">
+    <input type="number" id="borrowEquipmentId" placeholder="Equipment ID">
+    <button onclick="borrowEquipment()">Borrow</button>
+  </div>
 
-  <h2>📦 Borrow Equipment</h2>
-  <input type="number" id="borrowEmployeeId" placeholder="Employee ID">
-  <input type="number" id="borrowEquipmentId" placeholder="Equipment ID">
-  <button onclick="borrowEquipment()">Borrow</button>
-
-  <!-- <h2>📤 Return Equipment</h2>
-  <input type="number" id="returnBorrowId" placeholder="Borrow ID">
-  <button onclick="returnEquipment()">Return</button> -->
-
-  <h2>🧾 View Borrow Records</h2>
-  <input type="number" id="searchEmployeeId" placeholder="Employee ID">
-  <button onclick="getBorrowRecords()">Search</button>
-  <button onclick="getAllBorrowRecords()">Search All</button>
-  <table id="borrowTable">
-    <thead>
-      <tr>
-        <th>Borrow ID</th>
-        <th>Employee ID</th>
-        <th>Equipment Name</th>
-        <th>Borrow Date</th>
-        <th>Return Date</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="section">
+    <h2>🧾 View Borrow Records</h2>
+    <input type="number" id="searchEmployeeId" placeholder="Employee ID">
+    <button onclick="getBorrowRecords()">Search</button>
+    <button onclick="getAllBorrowRecords()">Search All</button>
+    <table id="borrowTable">
+      <thead>
+        <tr>
+          <th>Borrow ID</th>
+          <th>Employee ID</th>
+          <th>Equipment Name</th>
+          <th>Borrow Date</th>
+          <th>Return Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
   <script>
     const API = "http://localhost:8081";
@@ -118,19 +194,6 @@
       });
     }
 
-    async function addEquipment() {
-      const name = document.getElementById("nameInput").value;
-      const type = document.getElementById("typeInput").value;
-      const res = await fetch(`${API}/equipment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, type, available: true })
-      });
-      const data = await res.json();
-      alert("Added equipment: " + data.name);
-      loadAllEquipment();
-    }
-
     async function borrowEquipment() {
       const employeeId = document.getElementById("borrowEmployeeId").value;
       const equipmentId = document.getElementById("borrowEquipmentId").value;
@@ -147,65 +210,32 @@
     }
 
     async function returnEquipment(borrowId) {
-      // const borrowId = document.getElementById("returnBorrowId").value;
       const res = await fetch(`${API}/borrow/return?borrowId=${borrowId}`, {
         method: "POST"
       });
       if (res.ok) {
-        const data = await res.json();
         alert("Returned successfully.");
         loadAllEquipment();
         getAllBorrowRecords();
       } else {
         alert("Return failed. " + await res.text());
       }
-
     }
-
-    /*async function getBorrowRecords() {
-        const employeeId = document.getElementById("searchEmployeeId").value;
-        const res = await fetch(`${API}/borrow/employee/${employeeId}`);
-        const data = await res.json();
-        const tbody = document.querySelector("#borrowTable tbody");
-        tbody.innerHTML = "";
-        data.forEach(r => {
-            tbody.innerHTML += `<tr>
-            <td>${r.id}</td>
-            <td>${r.equipment.name}</td>
-            <td>${r.borrowDate}</td>
-            <td>${r.returnDate || "-"}</td>
-            <td>${r.returned ? "✅ Returned" : "❌ Not Returned"}</td>
-            </tr>`;
-        });
-        }*/
 
     async function getBorrowRecords() {
       const employeeId = document.getElementById("searchEmployeeId").value;
       const res = await fetch(`${API}/borrow/employee/${employeeId}`);
       const data = await res.json();
-      const tbody = document.querySelector("#borrowTable tbody");
-      tbody.innerHTML = "";
-
-      data.forEach(r => {
-        const returnButton = !r.returned
-          ? `<button onclick="returnEquipment(${r.id})">Return</button>`
-          : "";
-
-        tbody.innerHTML += `<tr>
-                <td>${r.id}</td>
-                <td>${r.employeeid}</td>
-                <td>${r.equipment.name}</td>
-                <td>${r.borrowDate}</td>
-                <td>${r.returnDate || "-"}</td>
-                <td>${r.returned ? "✅ Returned" : "❌ Not Returned"} ${returnButton}</td>
-            </tr>`;
-      });
+      displayBorrowRecords(data);
     }
 
     async function getAllBorrowRecords() {
-      const employeeId = document.getElementById("searchEmployeeId").value;
       const res = await fetch(`${API}/borrow/all`);
       const data = await res.json();
+      displayBorrowRecords(data);
+    }
+
+    function displayBorrowRecords(data) {
       const tbody = document.querySelector("#borrowTable tbody");
       tbody.innerHTML = "";
 
@@ -216,7 +246,7 @@
 
         tbody.innerHTML += `<tr>
                 <td>${r.id}</td>
-                <td>${r.employeeId}</td>
+                <td>${r.employeeId || r.employeeid}</td>
                 <td>${r.equipment.name}</td>
                 <td>${r.borrowDate}</td>
                 <td>${r.returnDate || "-"}</td>
@@ -224,8 +254,6 @@
             </tr>`;
       });
     }
-
-
   </script>
 </body>
 
